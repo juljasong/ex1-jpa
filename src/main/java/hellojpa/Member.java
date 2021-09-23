@@ -6,6 +6,13 @@ import javax.persistence.*;
 //@Table(name = "MEMBER")
 public class Member {
 
+    private Member() {}
+
+    public Member(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     @Id
     private Long id;
     //@Column(name = "name")

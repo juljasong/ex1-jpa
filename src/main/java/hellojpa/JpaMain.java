@@ -18,17 +18,19 @@ public class JpaMain {
         try {
             //code
 
-            //em.persist(member);
+            Member findMember = em.find(Member.class, 2L);
 
-            //Member findMember = em.find(Member.class, 1L);// Entity.Class, PK
-            //em.remove(findMember);
-            //findMember.setName("User1");
+            findMember.setName("user2");
 
+            //(DB에 저장되기 전) 1차 캐시에서 조회
+            //Member findMember = em.find(Member.class, 2L);
+            //System.out.println(findMember.getName());
 
-            List<Member> result = em.createQuery("select m from Member as m", Member.class).getResultList();
-            for(Member m : result) {
-                System.out.println(m.getId() + " | " + m.getName());
-            }
+            //준영속
+            //em.detach(member);
+
+            //삭제
+            //em.remove(member);
 
             tx.commit();
 
