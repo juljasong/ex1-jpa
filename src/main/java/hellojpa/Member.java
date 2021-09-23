@@ -8,15 +8,16 @@ public class Member {
 
     private Member() {}
 
+    @Id
+    private Long id;
+    //@Column(name = "name")
+    @Column(unique = true, length = 10)
+    private String name;
+
     public Member(Long id, String name) {
         this.id = id;
         this.name = name;
     }
-
-    @Id
-    private Long id;
-    //@Column(name = "name")
-    private String name;
 
     public Long getId() {
         return id;

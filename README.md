@@ -3,10 +3,10 @@
   - resources/META-INF/persistence.xml : 설정 파일
   - pom.xml : Maven 외부 라이브러리 및 버전 관리
 
-# 20210923_영속성 컨텍스트(Persistence Context)
+# 20210923_영속성 관리 - 내부 동작 방식
 ### 영속성 컨텍스트(Persistence Context)
 - 엔티티를 영구 저장하는 환경
-- EntityManager -> PersistenceContext 접근
+- EntityManager -> PersistenceContext(1차 캐시?) 접근
   - EntityManager.persist(entity);
 - 엔티티의 생명주기
   - 비영속(new/transient)
@@ -59,4 +59,36 @@
   //em.persist(findMember); 없어도 동작함
   ````
   - 지연 로딩(Lazy Loadingg)
-    
+  
+
+# 20210924_엔티티 매핑
+- 객체 @Entity : JPA가 관리하는 엔티티
+  - 기본 생성자 필수
+  - final 클래스, enum, interface, inner 클래스 사용 X
+  - 저장할 필드에 final 사용 X
+  - 속성 : name
+    - JPA에서 사용할 엔티티 이름 지정
+    - 기본값 : 클래스 이름 그대로 사용
+    - 같은 클래스 이름이 없으면 가급적 기본값 사용한다
+- 테이블 @Table
+- 필드, 컬럼 @Column
+- 기본 키 @Id
+- 연관관계 @ManyToOne, @JoinColumn
+
+### 데이터베이스 스키마 자동 생성
+- DDL을 애플리케이션 실행 시점에 자동 생성
+- 테이블 중심 -> 객체 중심
+- 데이터베이스에 맞는 적절한 DDL 생성
+- 생성된 DDL은 개발 장비에서만 사용하고, 운영 서버에서는 사용하지 않거나 적절히 다듬은 후 사용할 것 
+  - 운영 장비에서는 절대 create, create-drop, update 사용 X
+- hibernate.hbm2ddl.auto
+  - create : 기존 테이블 삭제 후 다시 생성 (DROP + CREATE)
+  - create-drop : create와 같으나 종료시점에 테이블 DROP
+  - update : 변경분만 반영(운영 DB 사용 금지)
+  - validate : 엔티티와 테이블이 정상 매핑되었는지만 확인
+  - none : 사용하지 않음
+
+### DDL 생성 기능
+- 제약 조건 추가 
+  - @Column(nullable = false, length = 10) : 필수 항목, 10자 초과 X
+  - DDL 생성 기능에만 사용되고 JPA 실행 로직에는 영향 X
