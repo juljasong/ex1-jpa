@@ -92,3 +92,66 @@
 - 제약 조건 추가 
   - @Column(nullable = false, length = 10) : 필수 항목, 10자 초과 X
   - DDL 생성 기능에만 사용되고 JPA 실행 로직에는 영향 X
+
+# 20210925_필드와 컬럼 매핑
+
+````java
+@Entity
+//@Table(name = "MEMBER")
+public class Member {
+    @Id
+    private Long id;
+
+    @Column(name = "name")
+    private String username;
+
+    private Integer age;
+
+    @Enumerated(EnumType.STRING) // ENUM 사용시
+    private RoleType roleType;
+
+    @Temporal(TemporalType.TIMESTAMP) // TemporalType 사용시 : Date, TIME, TIMESTAMP
+    private Date createdDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModifiedDate;
+
+    @Lob // VARCHAR 보다 긴 문장
+    private String description;
+}
+````
+=>
+create table Member (
+id bigint not null,
+age integer,
+createdDate timestamp,
+description clob,
+lastModifiedDate timestamp,
+roleType varchar(255),
+name varchar(255),
+primary key (id)
+)
+
+- @Column : 컬럼 매핑
+  - name : 필드와 매핑할 테이블의 컬럼 이름 (default: 객체 필드 이름)
+  - insertable, updatable : 등록, 변경 여부 (default: TRUE)
+  - nullable(DDL) : null 값 허용 여부 설정. false로 설정하면 DDL 생성 시 not null 제약 조건 붙음.
+  - unique(DDL) : @Table의 uniqueConstraints와 같지만 한 컬럼에 간단히 유니크 제약조건을 걸 때 사용한다. 단 유니크 컬럼의 이름은 랜덤으로 지정되니 사용하지 않음.
+  - columnDefinition(DDL) : 데이터 베이스 컬럼 정보를 직접 줄 수 있음. 
+    - ex) columnDefinition = "varchar(100) default 'EMPTY'"
+  - length(DDL) : 문자 길이 제약 조건, String 타입에만 사용
+  - precision, scale(DDL) : BigDecimal/BigInteger 타입에서 사용.
+    - precision : 소수점을 포함한 전체 자릿수
+    - scale : 소수의 자릿수
+- @Temporal : 날짜 타입 매핑. LocalDate, LocalDateTime 사용 시에는 생략 가능
+  - TemporalType.TIME, TemporalType.DATE, TemporalType.TIMESTAMP
+- @Enumerated : enum 타입 매핑
+    - EnumType.ORDINAL : enum 순서를 DB에 저장. 사용 X
+    - EnumType.STRING : enum 이름을 DB에 저장
+- @Lob : BLOB, CLOB 매핑.
+  - BLOB : 매핑하는 문자열이 String이 아닌 경우 자동 지정
+  - CLOB : 매핑하는 문자열이 String인 경우 자동 지정
+- @Transient : 특정 필드를 매핑에서 제외
+  - DB 저장 및 조회 X
+  - 주로 메모리상에서만 임시로 어떤 값을 보관하고 싶을 때 사용
+  

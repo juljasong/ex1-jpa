@@ -1,37 +1,37 @@
 package hellojpa;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 //@Table(name = "MEMBER")
 public class Member {
 
-    private Member() {}
-
     @Id
     private Long id;
-    //@Column(name = "name")
-    @Column(unique = true, length = 10)
-    private String name;
+
+    //@Column(unique = true, length = 10)
+    @Column(name = "name")
+    private String username;
+
+    private Integer age;
+
+    @Enumerated(EnumType.STRING) // ENUM 사용시
+    private RoleType roleType;
+
+    @Temporal(TemporalType.TIMESTAMP) // TemporalType 사용시 : Date, TIME, TIMESTAMP
+    private Date createdDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModifiedDate;
+
+    @Lob // VARCHAR 보다 긴 문장
+    private String description;
+
+    private Member() {}
 
     public Member(Long id, String name) {
         this.id = id;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.username = name;
     }
 }
