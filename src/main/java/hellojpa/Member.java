@@ -4,34 +4,35 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-//@Table(name = "MEMBER")
+@TableGenerator(name = "MEMBER_SEQ_GENERATOR",
+                table = "MY_SEQUENCES",
+                pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
 public class Member {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "MEMBER_SEQ_GENERATOR") // AUTO(default)
     private Long id;
 
     //@Column(unique = true, length = 10)
     @Column(name = "name")
     private String username;
 
-    private Integer age;
-
-    @Enumerated(EnumType.STRING) // ENUM 사용시
-    private RoleType roleType;
-
-    @Temporal(TemporalType.TIMESTAMP) // TemporalType 사용시 : Date, TIME, TIMESTAMP
-    private Date createdDate;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
-
-    @Lob // VARCHAR 보다 긴 문장
-    private String description;
-
-    private Member() {}
-
-    public Member(Long id, String name) {
-        this.id = id;
-        this.username = name;
+    public Long getId() {
+        return id;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    //private Member() {}
+
 }

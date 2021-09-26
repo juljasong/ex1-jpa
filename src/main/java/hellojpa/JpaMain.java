@@ -18,6 +18,9 @@ public class JpaMain {
         try {
             //code
 
+            Member member = new Member();
+            member.setUsername("ABC");
+            em.persist(member);
             //Member findMember = em.find(Member.class, 2L);
 
             //findMember.setName("user2");

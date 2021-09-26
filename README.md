@@ -155,3 +155,59 @@ primary key (id)
   - DB 저장 및 조회 X
   - 주로 메모리상에서만 임시로 어떤 값을 보관하고 싶을 때 사용
   
+# 20210926_기본 키 매핑
+- @Id : 직접 할당
+- @GeneratedValue : 자동 생성 ex) @GeneratedValue(strategy = GenerationType.AUTO)
+  - AUTO : 방언에 따라 자동 지정, 기본값 
+  
+  - IDENTITY : 데이터베이스에 위임, MYSQL
+    - 이 경우, commit 이전에 insert 쿼리가 날아감(DB에 접근하기 전까지 PK를 알 수 없기 때문에)
+  
+  - SEQUENCE : 데이터베이스 시퀀스 오브젝트 사용, ORACLE
+    - @SequenceGenerator 필요
+      - sequenceName : DB에 등록되어 있는 시퀀스 이름
+      - initialValue : DDL 생성 시에만 사용, 시퀀스 DDL을 생성할 때 처음 1로 시작하는 수 지정
+      - allocationSize(default: 50) : 시퀀스 한 번 호출에 증가하는 수(성능 최적화에 사용됨). DB 시퀀스 값이 하나씩 증가하도록 설정되어 있으면 이 값을 반드시 1로 설정해야 함.
+      - catalog, schema : DB catalog, schema 이름
+```java
+        @Entity
+        @SequenceGenerator(name = "member_seq_generator", 
+                           sequenceName = "member_Seq")
+        public class Member {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_seq_generator") // AUTO(default)
+        private Long id;
+        
+        }
+```
+- 
+  - TABLE : 키 생성용 테이블 사용, 모든 DB에서 사용
+    - 장점 : 모든 DB에 적용 가능
+    - @TableGenerator 필요
+      - name(필수) : 식별자 생성기 이름
+      - table(hibernate_sequences) : 키 생성 테이블명
+      - pkColumnName(sequence_name) : 시퀀스 컬럼명
+      - valueColumnNa(next_val) : 시퀀스 값 컬럼명
+      - pkColumnValue(엔티티 이름) : 키로 사용할 값 이름
+      - initialValue(0) : 초기값, 마지막으로 생성된 값 기준
+      - allocationSize(50) : 시퀀스 한 번 호출에 증가하는 수(성능 최적화에 사용)
+      - catalog, schema : DB catalog, schema 이름
+      - uniqueConstraints(DDL) : 유니크 제약 조건 지정
+```java
+@Entity
+@TableGenerator(name = "MEMBER_SEQ_GENERATOR",
+                table = "MY_SEQUENCES",
+                pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
+public class Member {
+    
+@Id
+@GeneratedValue(strategy = GenerationType.TABLE, generator = "MEMBER_SEQ_GENERATOR") // AUTO(default)
+private Long id;
+}
+```
+
+### 권장하는 식별자 전략
+- 기본키 제약 조건 : NOT NULL, UNIQUE, 변하면 안된다.
+- 미래까지 이 조건을  만족하는 자연키는 찾기 어려움 -> 대리키(대체키) 사용
+- 권장 : Long + 대체키 + 키 생성 전략 사용
