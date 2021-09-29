@@ -19,20 +19,25 @@ public class JpaMain {
         try {
             //code
 
+            Team team = new Team();
+            team.setName("TEAM");
+            em.persist(team);
+
             Member member = new Member();
             member.setUsername("USER");
+            member.setTeam(team);
 
             em.persist(member);
 
             em.flush();
             em.clear();
-
-            //Member findMember = em.find(Member.class, member.getId());
-            //System.out.println("===" + findMember.getUsername());
             
-            Member findMember = em.getReference(Member.class, member.getId()); // 해당 값이 실제 사용되는 시점에 쿼리 날림
-            System.out.println("===" + findMember.getUsername());
+            Member m = em.find(Member.class, member.getId()); // 해당 값이 실제 사용되는 시점에 쿼리 날림
 
+            System.out.println("m = " + m.getTeam().getClass()); //Proxy
+            //System.out.println("================");
+            m.getTeam().getName(); // 실제 team을 사용하는 시점에 초기화(DB 조회)
+            //System.out.println("================");
             tx.commit();
             //code
         } catch (Exception e) {

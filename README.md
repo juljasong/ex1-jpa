@@ -445,7 +445,7 @@ public class Team extends BaseEntity {
 }
 ````
 
-# 프록시
+# 20210929_프록시
 ### em.find() vs em.getRefernce()
   - em.find(): DB를 통해 실제 엔티티 객체 조회
   - em.getRefernce(): DB 조회를 미루는 가짜(프록시) 엔티티 객체 조회
@@ -465,3 +465,19 @@ public class Team extends BaseEntity {
   - 프록시 클래스 확인: entity.getClass().getName()
   - 프록시 강제 초기화: org.hibernate.Hibernate.initialize(entity);
   - 참고: JPA 표준은 강제 초기화 X. 강제 호출은 member.getName()
+
+## 즉시 로딩과 지연 로딩
+- @ManyToOne(fetch = FetchType.EAGER)
+  - 예상하지 못한 SQL 발생
+  - JPQL에서 N+1 문제 발생
+  - @ManyToOne, @OneToOne은 기본이 즉시 로딩
+- @ManyToOne(fetch = FetchType.LAZY)
+  - 가급적 지연 로딩 사용(실무에서)
+  - @OneToMany, @ManyToMany는 기본이 지연 로딩
+  - 
+### 지연 로딩 활용
+- Member와 Team 자주 함께 사용 -> 즉시로딩
+- Member와 Order 가끔 사용 -> 지연로딩
+- Order와 Product는 자주 함께 사용 -> 즉시로딩
+=> 이론적인 거.. 실무에서는 전부 지연로딩으로
+- JPQL fetch 조인, 엔티티 그래프 기능 사용할 것
