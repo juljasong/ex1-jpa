@@ -414,3 +414,33 @@ public class Team {
         - 자식 테이블을 통합해서 쿼리하기 어려움
 
 ### @MappedSuperclass : 속성만 상속
+- 공통 매핑 정보가 필요할 때 사용(id, name)
+![img_3.png](img_3.png)
+- 상속 관계 매핑 X
+- 엔티티 X, 테이블 매핑 X
+- 부모 클래스를 상속 받는 자식 클래스에 매핑 정보만 젲공
+- 조회, 검색(em.find(BaseEntity)) 불가
+- 직접 생성해서 사용할 일 없으므로 추상 클래스 권장
+- 전체 엔티티에서 공통으로 적용하는 정보 모을 때 사용
+- @Entity 클래스는 엔티티나 @MappedSuperclass로 지정한 클래스만 상속 가능
+
+````java
+@MappedSuperclass
+public abstract class BaseEntity {
+
+  @Column(name = "INSERT_MEMBER")
+  private String createdBy;
+  private LocalDateTime createdTime;
+  @Column(name = "UPDATE_MEMBER")
+  private String lastModifiedBy;
+  private LocalDateTime lastModifiedDate;
+  ...
+}
+````
+
+````java
+@Entity
+public class Team extends BaseEntity {
+  ...
+}
+````
