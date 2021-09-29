@@ -19,26 +19,25 @@ public class JpaMain {
         try {
             //code
 
-            Team team = new Team();
-            team.setName("TEAM");
-            em.persist(team);
+            Child child1 = new Child();
+            Child child2 = new Child();
 
-            Member member = new Member();
-            member.setUsername("USER");
-            member.setTeam(team);
+            Parent parent = new Parent();
+            parent.addChild(child1);
+            parent.addChild(child2);
 
-            em.persist(member);
+            em.persist(parent);
+            //em.persist(child1);
+            //em.persist(child2);
 
             em.flush();
             em.clear();
-            
-            Member m = em.find(Member.class, member.getId()); // 해당 값이 실제 사용되는 시점에 쿼리 날림
 
-            System.out.println("m = " + m.getTeam().getClass()); //Proxy
-            //System.out.println("================");
-            m.getTeam().getName(); // 실제 team을 사용하는 시점에 초기화(DB 조회)
-            //System.out.println("================");
+            Parent findParent = em.find(Parent.class, parent.getId());
+            findParent.getChildList().remove(0);
+
             tx.commit();
+
             //code
         } catch (Exception e) {
             tx.rollback();
