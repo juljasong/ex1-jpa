@@ -566,3 +566,28 @@ public class Team extends BaseEntity {
     })
     private Address workAddress;
   ````
+  
+# 20211002_값 타입과 불변 객체
+- 임베디드 타입 같은 값 타입을 여러 엔티티에서 공유하면 부작용 발생
+  - 항상 값을 복사하여 사용하면 공유 참조로 인해 발생하는 부작용 피할 수 있음
+  - 문제는 임베디드 타입처럼 직접 정의한 값 타입은 자바의 기본 타입이 아닌 객체 타입
+  - 자바 기본 타입에 값을 대입하면 값을 복사함
+  - 객체 타입은 참조 값을 직접 대입하는 것을 막을 방법이 없다
+  - 객체의 공유 참조는 피할 수 없음
+  - 객체 타입을 수정할 수 없게 만들면 부작용 원천 차단
+  - 값 타입은 불변 객체(immutable object)로 설계
+    - 불변 객체: 생성 시점 이후 값을 변경할 수 없는 객체
+    - 생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 됨
+    - Integer, String은 자바가 제공하는 대표적인 불변 객체
+````java
+            Address address = new Address("city", "street", "zip");
+
+            Member member = new Member();
+            member.setUsername("ABC");
+            member.setHomeAddress(address);
+
+            Address newAddress = new Address("newCity", address.getStreet(), address.getZipcode());
+            member.setHomeAddress(newAddress);
+
+            em.persist(member);
+````
