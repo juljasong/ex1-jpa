@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
-public class Member extends BaseEntity {
+public class Member {
 
     @Id @GeneratedValue
     @Column(name = "MEMBER_ID")
@@ -14,16 +14,23 @@ public class Member extends BaseEntity {
     @Column(name = "USERNAME")
     private String username;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn
-    private Team team;
+    //기간 Period
+    @Embedded
+    private Period workPeriod;
 
-    public Team getTeam() {
-        return team;
-    }
+    //주소 Address
+    @Embedded
+    private Address homeAddress;
 
-    public void setTeam(Team team) {
-        this.team = team;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city", column = @Column(name = "W_CITY")),
+            @AttributeOverride(name = "street", column = @Column(name = "W_STREET")),
+            @AttributeOverride(name = "zipcode", column = @Column(name = "W_ZIPCODE"))
+    })
+    private Address workAddress;
+
+    public Member() {
     }
 
     public Long getId() {
@@ -42,4 +49,19 @@ public class Member extends BaseEntity {
         this.username = username;
     }
 
+    public Period getWorkPeriod() {
+        return workPeriod;
+    }
+
+    public void setWorkPeriod(Period workPeriod) {
+        this.workPeriod = workPeriod;
+    }
+
+    public Address getHomeAddress() {
+        return homeAddress;
+    }
+
+    public void setHomeAddress(Address homeAddress) {
+        this.homeAddress = homeAddress;
+    }
 }

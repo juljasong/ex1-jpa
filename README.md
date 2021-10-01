@@ -530,3 +530,39 @@ public class Team extends BaseEntity {
   - 값 타입 공유 X -> 회원 이름 변경 시 다른 회원의 이름도 함꼐 변경되면 안됨
 - 임베디드 타입(embedded type, 복합 값 타입)
 - 컬렉션 값 타입(collection value type)
+
+### 임베디드 타입
+
+- 새로운 값 타입을 직접 정의할 수 있음
+- JPA는 임베디드 타입(Embedded type)이라고 함
+- 주로 기본 값 타입을 모아 만들어서 복합 값 타입이라고도 함
+- int, String과 같은 값 타입
+- Member [id, name, workPeriod[startDate, endDate], homeAddress[city, street, zipcode]]
+- @Embeddable: 값 타입을 정의하는 곳에 표시
+- @Embedded: 값 타입을 사용하는 곳에 표시
+- 기본 생성자 필수
+- 장점
+  - 재사용
+  - 높은 응집도
+  - Period.isWork() 처럼 해당 값 타입만 사용하는 의미있는 메소드 만들 수 있음
+  - 임베디드 타입을 포함한 모든 값 타입은 값 타입을 소유한 엔티티에 생명 주기를 의존함
+- 임베디드 타입과 테이블 매핑
+  - 임베디드 타입은 엔티티의 값일 뿐
+  - 임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 동일
+  - 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능
+  - 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수보다 클래스의 수가 더 많음
+
+### 임베디드 타입과 연관관계
+- @AttributeOverride: 속성 재정의
+  - 한 엔티티에서 같은 값 타입 사용
+  - 컬럼 명 중복 시
+  - @AttributeOverrides, @AttributeOverride 사용하여 컬럼 명 속성 재정의
+  ````java
+  @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city", column = @Column(name = "W_CITY")),
+            @AttributeOverride(name = "street", column = @Column(name = "W_STREET")),
+            @AttributeOverride(name = "zipcode", column = @Column(name = "W_ZIPCODE"))
+    })
+    private Address workAddress;
+  ````
