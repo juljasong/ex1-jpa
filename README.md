@@ -591,3 +591,21 @@ public class Team extends BaseEntity {
 
             em.persist(member);
 ````
+
+### 값 타입 비교
+- 동일성(identity) 비교: 인스턴스의 참조 값 비교 (==) 
+- 동등성(equivalence) 비교: 인스턴스의 값 비교 (equals()) -> 값 타입의 equals() 메소드 적절하게 재정의
+````java
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(city, address.city) && Objects.equals(street, address.street) && Objects.equals(zipcode, address.zipcode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(city, street, zipcode);
+    }
+````
