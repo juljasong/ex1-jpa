@@ -596,18 +596,18 @@ public class Team extends BaseEntity {
 - 동일성(identity) 비교: 인스턴스의 참조 값 비교 (==) 
 - 동등성(equivalence) 비교: 인스턴스의 값 비교 (equals()) -> 값 타입의 equals() 메소드 적절하게 재정의
 ````java
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Address address = (Address) o;
-        return Objects.equals(city, address.city) && Objects.equals(street, address.street) && Objects.equals(zipcode, address.zipcode);
-    }
+@Override
+public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Address address = (Address) o;
+    return Objects.equals(city, address.city) && Objects.equals(street, address.street) && Objects.equals(zipcode, address.zipcode);
+}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(city, street, zipcode);
-    }
+@Override
+public int hashCode() {
+    return Objects.hash(city, street, zipcode);
+}
 ````
 
 # 값 타입 컬렉션
@@ -618,16 +618,16 @@ public class Team extends BaseEntity {
 - 참고: 값타입 컬렉션은 영속성 전이(Cascade) + 고아 객체 제거 기능 필수로 가짐.. 라이프 사이클이 함께 해요..
 - 값 타입 컬렙션은 지연 로딩 전략 사용
 ````java
-    @ElementCollection
-    @CollectionTable(name = "FAVORITE_FOODS",
-            joinColumns = @JoinColumn(name = "MEMBER_ID"))
-    @Column(name = "FOOD_NAME")
-    private Set<String> favoriteFoods = new HashSet<>();
+@ElementCollection
+@CollectionTable(name = "FAVORITE_FOODS",
+        joinColumns = @JoinColumn(name = "MEMBER_ID"))
+@Column(name = "FOOD_NAME")
+private Set<String> favoriteFoods = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name = "ADDRESS",
-            joinColumns = @JoinColumn(name = "MEMBER_ID"))
-    private List<Address> addressHistory = new ArrayList<>();
+@ElementCollection
+@CollectionTable(name = "ADDRESS",
+        joinColumns = @JoinColumn(name = "MEMBER_ID"))
+private List<Address> addressHistory = new ArrayList<>();
 ````
 ### 값 타입 컬렉션의 제약사항
 - 값 타입은 엔티티와 다르게 식별자 개념 X
@@ -650,3 +650,88 @@ public class Team extends BaseEntity {
   - 생명 주기를 엔티티에 의존
   - 공유하지 X (복사하여 사용)
   - 불변 객체로 만드는 것이 아전
+
+# 20211003_JPA에서 지원하는 쿼리
+- JPQL
+- JPA Criteria
+- QueryDSL
+- 네이티브 SQL
+- JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
+
+### JPQL
+````java
+//select m From Member as m where m.username like '%user%'
+List<Member> result = em.createQuery("select m From Member m where m.username like '%user%'", Member.class).getResultList();
+
+for (Member member : result) {
+    System.out.println(member.getUsername());
+}
+````
+- 가장 단순한 조회 방법
+  - EntityManager.find()
+  - 객체 그래프 탐색(a.getB().getC())
+- 나이가 18살 이상인 회원을 모두 검색하고 싶다면?
+- JPA를 사용하면 엔티티 객체를 중심으로 개발, 문제는 검색 쿼리
+- 검색을 할 때도 테이블이 아닌 엔티티 객체를 대상으로 검색
+- 모든 DB  데이터를 객체로 변환해서 검색하는 것은 불가능
+- 애플리케이션이 필요한 데이터만 DB에서 불러오려면 결국 검색 조건이 포함된 SQL 필요
+- JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어 제공 -> 특정 DB SQL에 의존 X
+- SQL과 문법 유사, SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 지원
+- JPQL은 엔티티 객체를 대상으로 쿼리
+- SQL은 데이터 베이스 테이블을 대상으로 쿼리
+- 동적 쿼리 생성 어려움
+
+
+### Criteria
+````java
+CriteriaBuilder cb = em.getCriteriaBuilder();
+CriteriaQuery<Member> query = cb.createQuery(Member.class);
+
+Root<Member> m = query.from(Member.class);
+CriteriaQuery<Member> cq = query.select(m);
+
+String username = "Song";
+
+if (username != null) {
+    cq = cq.where(cb.equal(m.get("username"), username));
+}
+
+List<Member> resultList = em.createQuery(cq).getResultList();
+````
+- SQL을 코드로 JPQL 작성.. 
+- JPQL 빌더 역할
+- JPA 공식 기능이나, 너무 복잡하고 실용성 없음 => QueryDSL 사용 권장
+
+
+### QueryDSL
+````java
+//JPQL
+//select m from Member m wheree m.age > 18
+JPAFactoryQuery query = new JPAQueryFactory(em);
+QMember m = QMember.member;
+
+List<Member> list =
+    query.selectFrom(m)
+         .where(m.age.gt(18))
+         .orderBy(m.name.desc())
+         .fetch();
+````
+- 문자가 아닌 코드로 JPQL 작성 가능
+- JPQL 빌더 역할
+- 컴파일 시점에 문법 오류 찾을 수 있음
+- 동적 쿼리 작성 편리
+- 단순, 쉬움
+- 실무 사용 권장
+
+### 네이티브 SQL
+````java
+List<Member> resultList = em.createNativeQuery("select MEMBER_ID, city, street, zipcode from MEMBER", Member.class).getResultList();
+````
+- JPA가 제공하는 SQL을 직접 사용하는 기능
+- JPQL로 해결할 수 없는 특정 DB에 의존적인 기능
+- ex) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
+- 
+### JDBC API 직접 사용, SpringJdbcTemplate 등
+- JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, MyBatis 등을 함께 사용 가능
+- 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시 필요
+- ex) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트 수동 플러시
